@@ -9,8 +9,10 @@
 // Por isso este arquivo NÃO chama a UTMify de novo — evita duplicar vendas.
 // ============================================================================
 
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import { fbCapiSendEvent } from '../../lib/config.js';
+
+const redis = Redis.fromEnv();
 
 const PAID_STATUSES = ['paid', 'approved', 'completed', 'complete', 'confirmed', 'success', 'succeeded'];
 
@@ -31,7 +33,7 @@ export default async function handler(req, res) {
     );
 
     if (transactionId && PAID_STATUSES.includes(status)) {
-      const raw = await kv.get(`tx:${transactionId}`);
+      const raw = await redis.get(`tx:${transactionId}`);
 
       if (raw) {
         const txData = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -49,7 +51,7 @@ export default async function handler(req, res) {
           txData.sourceUrl || ''
         );
 
-        await kv.del(`tx:${transactionId}`); // Não precisamos mais guardar essa fichinha.
+        await redis.del(`tx:${transactionId}`); // Não precisamos mais guardar essa fichinha.
       } else {
         console.warn(`Facebook CAPI: fichinha da transação ${transactionId} não encontrada (Purchase não enviado).`);
       }
