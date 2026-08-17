@@ -7,7 +7,7 @@
 // ============================================================================
 
 import { randomBytes } from 'crypto';
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import {
   PUBLIC_URL,
   blackcatRequest,
@@ -16,6 +16,8 @@ import {
   isValidEmail,
 } from '../lib/config.js';
 import { rateLimitCheck, clientIp } from '../lib/ratelimit.js';
+
+const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', PUBLIC_URL || '*');
@@ -230,7 +232,7 @@ export default async function handler(req, res) {
       );
     }
 
-    await kv.set(
+    await redis.set(
       `tx:${transactionId}`,
       JSON.stringify({
         fbp,
