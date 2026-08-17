@@ -9,7 +9,7 @@
 // tipo Redis, com camada gratuita), que guarda esse controle de verdade.
 // ============================================================================
  
-import { getRedis } from './redis.js';
+import { getRedis } from '../lib/redis.js';
  
 const redis = getRedis();
  
